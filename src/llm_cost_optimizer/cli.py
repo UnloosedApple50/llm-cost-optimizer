@@ -186,6 +186,54 @@ def compare(
 
 
 @app.command()
+def update_prices(
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file for pricing data"),
+    force: bool = typer.Option(False, "--force", "-f", help="Force update even if cache is fresh"),
+):
+    """Fetch latest pricing from provider APIs and save to file."""
+    console.print(Panel.fit("[bold blue]Updating Pricing Data[/bold blue]"))
+
+    async def _update():
+        from datetime import datetime, timezone, timedelta
+        from llm_cost_optimizer.core.price_fetcher import PriceFetcher
+
+        fetcher = PriceFetcher()
+        try:
+            # Check if we have recent cached data
+            cache_file = Path("data/pricing.json")
+            if not force and cache_file.exists():
+                cached = await fetcher.load_from_file(str(cache_file))
+                if cached:
+                    # Check if cache is less than 24 hours old
+                    last_updated = max(p.last_updated for p in cached.values())
+                    if datetime.now(timezone.utc) - last_updated < timedelta(hours=24):
+                        console.print("[green]✅ Pricing data is up to date (less than 24h old)[/green]")
+                        console.print(f"Last updated: {last_updated.isoformat()}")
+                        return
+
+            console.print("[yellow]Fetching latest pricing from provider APIs...[/yellow]")
+
+            pricing = await fetcher.fetch_all()
+
+            if pricing:
+                output_file = str(output) if output else "data/pricing.json"
+                await fetcher.save_to_file(pricing, output_file)
+                console.print(f"[green]✅ Pricing data saved to {output_file}[/green]")
+                console.print(f"Providers updated: {', '.join(pricing.keys())}")
+            else:
+                console.print("[yellow]⚠️  No pricing data fetched from APIs.[/yellow]")
+                console.print("[yellow]Using hardcoded pricing values as fallback.[/yellow]")
+
+            fetcher._last_fetch = datetime.now(timezone.utc)
+            console.print(f"Last fetch: {fetcher._last_fetch.isoformat()}")
+        finally:
+            await fetcher.close()
+
+    import asyncio
+    asyncio.run(_update())
+
+
+@app.command()
 def log(
     model: str = typer.Argument(..., help="Model name"),
     prompt_tokens: int = typer.Argument(..., help="Number of prompt tokens"),
