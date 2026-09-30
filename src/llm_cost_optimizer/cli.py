@@ -43,7 +43,17 @@ def analyze(
             for line in f:
                 record = json.loads(line)
                 usage = LLMUsage(**record)
-                optimizer.add_usage(usage, cost_usd=0)  # Cost calculated from pricing
+                # Calculate cost from pricing
+                provider_pricing = ALL_PRICING.get(usage.provider)
+                if provider_pricing:
+                    model_pricing = provider_pricing.get_model(usage.model)
+                    if model_pricing:
+                        cost = model_pricing.calculate_cost(usage.prompt_tokens, usage.completion_tokens)
+                    else:
+                        cost = 0
+                else:
+                    cost = 0
+                optimizer.add_usage(usage, cost_usd=cost)
         console.print(f"[green]Loaded usage data from {data_file}[/green]")
     else:
         console.print("[yellow]No usage data found. Use 'llm-cost log' to track usage.[/yellow]")
@@ -112,7 +122,7 @@ def suggest(
         console.print("[yellow]No models match your criteria.[/yellow]")
         return
 
-    table = Table(title=f"Best models for {task.value}")
+    table = Table(title=f"Best models for {task_type.value}")
     table.add_column("Model", style="cyan")
     table.add_column("Provider", style="magenta")
     table.add_column("Quality", justify="right")
