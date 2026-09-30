@@ -15,11 +15,11 @@
 
 | Provider | Models |
 |----------|--------|
-| OpenAI | GPT-4o, GPT-4o-mini, GPT-4-turbo, GPT-3.5-turbo, o1-preview, o1-mini |
-| Anthropic | Claude 3.5 Sonnet, Claude 3.5 Haiku, Claude 3 Opus, Claude 3 Haiku |
-| Google | Gemini 1.5 Pro, Gemini 1.5 Flash, Gemini 1.5 Flash 8B |
-| Ollama | Llama 3.1, Qwen 2.5 Coder, DeepSeek Coder, Mistral, CodeLlama |
-| DeepSeek | DeepSeek Chat, DeepSeek Coder |
+| OpenAI | GPT-5.6 Sol/Terra/Luna/Cyber, GPT-5.1, GPT-4.1, GPT-4.1-mini, GPT-4.1-nano, GPT-4o, GPT-4o-mini, o4-mini |
+| Anthropic | Claude Opus 5.5, Sonnet 5.5, Opus 5, Sonnet 5, Haiku 4.5 |
+| Google | Gemini 3.8 Flash, 3.7 Flash, 3.6 Flash, 3.1 Pro, 2.5 Pro, 2.5 Flash, 2.5 Flash-Lite |
+| Ollama | Llama 3.1 (8B/70B), Qwen 2.5 Coder (7B/32B), DeepSeek Coder (6.7B/33B), Mistral 7B, CodeLlama (7B/34B) |
+| DeepSeek | DeepSeek Chat, DeepSeek Coder, DeepSeek R1 |
 
 ## Installation
 
@@ -52,13 +52,19 @@ llm-cost suggest --task code_generation --budget 0.001
 ### Compare models
 
 ```bash
-llm-cost compare gpt-4o,gpt-4o-mini,claude-3-5-sonnet-20241022
+llm-cost compare gpt-5.6-sol,gpt-5.6-terra,claude-sonnet-5
 ```
 
 ### Log usage
 
 ```bash
-llm-cost log gpt-4o 1000 500 --provider openai --task chat
+llm-cost log gpt-5.6-sol 1000 500 --provider openai --task chat
+```
+
+### Update pricing data
+
+```bash
+llm-cost update-prices
 ```
 
 ## CLI Commands
@@ -69,6 +75,7 @@ llm-cost log gpt-4o 1000 500 --provider openai --task chat
 | `llm-cost suggest` | Suggest best model for a task |
 | `llm-cost compare` | Compare multiple models |
 | `llm-cost log` | Log a usage entry |
+| `llm-cost update-prices` | Fetch latest pricing from provider APIs |
 
 ## Task Types
 
